@@ -170,6 +170,8 @@ class Cliconf(CliconfBase):
         replace=None,
         comment=None,
         label=None,
+        confirm=None,
+        confirm_commit=None,
     ):
         operations = self.get_device_operations()
         self.check_edit_config_capability(
@@ -199,7 +201,7 @@ class Cliconf(CliconfBase):
 
         if commit:
             try:
-                self.commit(comment=comment, label=label, replace=replace)
+                self.commit(comment=comment, label=label, replace=replace, confirm=confirm, confirm_commit=confirm_commit)
             except AnsibleConnectionFailure as exc:
                 error_msg = to_text(exc, errors="surrogate_or_strict").strip()
                 if (
@@ -309,8 +311,14 @@ class Cliconf(CliconfBase):
             check_all=check_all,
         )
 
-    def commit(self, comment=None, label=None, replace=None):
+    def commit(self, comment=None, label=None, replace=None, confirm=None, confirm_commit=None):
         cmd_obj = {}
+        if confirm_commit:
+            timeout = confirm if confirm is not None else ''
+            confirmed_cmd_str = ' confirmed' if timeout == '' else ' confirmed {0}'.format(timeout)
+        else:
+            confirmed_cmd_str = ''
+
         if replace:
             cmd_obj["command"] = "commit replace"
             cmd_obj[
@@ -325,20 +333,24 @@ class Cliconf(CliconfBase):
             )
         else:
             if comment and label:
-                cmd_obj["command"] = "commit label {0} comment {1}".format(
-                    label, comment
+                cmd_obj["command"] = "commit label {0}{1} comment {2}".format(
+                    label, confirmed_cmd_str, comment
                 )
             elif comment:
                 cmd_obj["command"] = "commit comment {0}".format(comment)
             elif label:
-                cmd_obj["command"] = "commit label {0}".format(label)
+                cmd_obj["command"] = "commit label {0}{1}".format(
+                    label, confirmed_cmd_str
+                )
             else:
-                cmd_obj["command"] = "commit show-error"
+                cmd_obj["command"] = "commit{0} show-error".format(
+                    confirmed_cmd_str
+                )
             # In some cases even a normal commit, i.e., !replace,
             # throws a prompt and we need to handle it before
             # proceeding further
-            cmd_obj["prompt"] = "(C|c)onfirm"
-            cmd_obj["answer"] = "y"
+            # cmd_obj["prompt"] = "(C|c)onfirm"
+            # cmd_obj["answer"] = "y"
         self.send_command(**cmd_obj)
 
     def run_commands(self, commands=None, check_rc=True):

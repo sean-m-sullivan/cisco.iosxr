@@ -523,6 +523,8 @@ def load_config(
     running=None,
     nc_get_filter=None,
     label=None,
+    confirm=None,
+    confirm_commit=None,
 ):
 
     conn = get_connection(module)
@@ -571,6 +573,8 @@ def load_config(
                 replace=replace,
                 comment=comment,
                 label=label,
+                confirm=confirm,
+                confirm_commit=confirm_commit,
             )
             if module._diff:
                 diff = response.get("diff")

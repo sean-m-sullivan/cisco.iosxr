@@ -149,6 +149,21 @@ options:
       only alphabets, digits, hyphens and underscores are allowed. If the configuration
       is not changed or committed, this argument is ignored.
     type: str
+  confirm:
+    description:
+    - This argument will configure a timeout value for the commit to be confirmed
+      before it is automatically rolled back. If the C(confirm_commit) argument is
+      set to False, this argument is silently ignored. If the value of this argument
+      is set to 0, the commit is confirmed immediately. The remote host MUST support
+      :candidate and :confirmed-commit capability for this option to .
+    type: int
+    default: 0
+  confirm_commit:
+    description:
+    - This argument will execute commit operation on remote device. It can be used
+      to confirm a previous commit.
+    type: bool
+    default: no
   backup_options:
     description:
     - This is a dict object containing configurable options related to backup file
@@ -343,6 +358,8 @@ def run(module, result):
     exclusive = module.params["exclusive"]
     check_mode = module.check_mode
     label = module.params["label"]
+    confirm = module.params["confirm"]
+    confirm_commit = module.params["confirm_commit"]
 
     candidate_config = get_candidate(module)
     running_config = get_running_config(module)
@@ -433,6 +450,8 @@ def main():
         disable_default_comment=dict(type="bool", default=False),
         exclusive=dict(type="bool", default=False),
         label=dict(),
+        confirm=dict(type="int", default=0),
+        confirm_commit=dict(type="bool", default=False),
     )
 
     argument_spec.update(iosxr_argument_spec)
