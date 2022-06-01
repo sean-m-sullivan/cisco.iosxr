@@ -183,6 +183,11 @@ options:
     - disable default comment when set to True.
     type: bool
     default: false
+  disable_default_prompts:
+    description:
+    - disable default prompts and answers when set to True.
+    type: bool
+    default: false
 """
 
 EXAMPLES = """
@@ -339,6 +344,7 @@ def run(module, result):
     replace_config = replace == "config"
     path = module.params["parents"]
     comment = module.params["comment"]
+    disable_default_prompts = module.params["disable_default_prompts"]
     admin = module.params["admin"]
     exclusive = module.params["exclusive"]
     check_mode = module.check_mode
@@ -399,6 +405,7 @@ def run(module, result):
             commit=commit,
             replace=replace_file_path,
             comment=comment,
+            disable_default_prompts=disable_default_prompts,
             admin=admin,
             exclusive=exclusive,
             label=label,
@@ -431,6 +438,7 @@ def main():
         comment=dict(default=DEFAULT_COMMIT_COMMENT),
         admin=dict(type="bool", default=False),
         disable_default_comment=dict(type="bool", default=False),
+        disable_default_prompts=dict(type="bool", default=False),
         exclusive=dict(type="bool", default=False),
         label=dict(),
     )

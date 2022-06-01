@@ -169,6 +169,7 @@ class Cliconf(CliconfBase):
         exclusive=False,
         replace=None,
         comment=None,
+        disable_default_prompts=False,
         label=None,
     ):
         operations = self.get_device_operations()
@@ -199,7 +200,12 @@ class Cliconf(CliconfBase):
 
         if commit:
             try:
-                self.commit(comment=comment, label=label, replace=replace)
+                self.commit(
+                    comment=comment,
+                    label=label,
+                    replace=replace,
+                    disable_default_prompts=disable_default_prompts,
+                )
             except AnsibleConnectionFailure as exc:
                 error_msg = to_text(exc, errors="surrogate_or_strict").strip()
                 if (
@@ -309,7 +315,13 @@ class Cliconf(CliconfBase):
             check_all=check_all,
         )
 
-    def commit(self, comment=None, label=None, replace=None):
+    def commit(
+        self,
+        comment=None,
+        label=None,
+        disable_default_prompts=False,
+        replace=None,
+    ):
         cmd_obj = {}
         if self.get_option("commit_confirmed") and self.get_option(
             "commit_confirmed_timeout"
@@ -351,8 +363,9 @@ class Cliconf(CliconfBase):
             # In some cases even a normal commit, i.e., !replace,
             # throws a prompt and we need to handle it before
             # proceeding further
-            cmd_obj["prompt"] = "(C|c)onfirm"
-            cmd_obj["answer"] = "y"
+            if not disable_default_prompts:
+                cmd_obj["prompt"] = "(C|c)onfirm"
+                cmd_obj["answer"] = "y"
         self.send_command(**cmd_obj)
 
     def run_commands(self, commands=None, check_rc=True):

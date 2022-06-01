@@ -518,6 +518,7 @@ def load_config(
     commit=False,
     replace=False,
     comment=None,
+    disable_default_prompts=False,
     admin=False,
     exclusive=False,
     running=None,
@@ -570,6 +571,7 @@ def load_config(
                 exclusive=exclusive,
                 replace=replace,
                 comment=comment,
+                disable_default_prompts=disable_default_prompts,
                 label=label,
             )
             if module._diff:

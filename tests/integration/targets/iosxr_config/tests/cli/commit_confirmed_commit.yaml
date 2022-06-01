@@ -1,0 +1,61 @@
+---
+- debug: msg="START cli/commit_confirmed.yaml on connection={{ ansible_connection }}"
+
+- name: "Set commit label"
+  set_fact:
+    commit_label: "iosxr_test_{{ lookup('password', '/dev/null chars=ascii_letters length=8') }}"
+
+- name: "get hostname"
+  register: get_hostname
+  iosxr_command:
+    commands:
+      - "show running-config hostname"
+  ignore_errors: true
+
+- name: test commit confirmed functionality
+  vars:
+    ansible_iosxr_commit_confirmed: true
+    ansible_iosxr_commit_confirmed_timeout: 60
+  cisco.iosxr.iosxr_config:
+    lines:
+      - hostname iosxr_commit_confirmed
+    label: '{{ commit_label }}'
+    disable_default_comment: true
+
+- name: "Confirm the Commit"
+  cisco.iosxr.iosxr_command:
+    commands:
+      - commit confirm
+  vars:
+    ansible_iosxr_commit_confirmed: true
+
+- name: Sleep for 70 secs as rollback to happen.
+  wait_for:
+    timeout: 70
+
+- name: "get hostname"
+  register: get_hostname1
+  iosxr_command:
+    commands:
+      - "show running-config hostname"
+  ignore_errors: true
+
+- assert:
+    that:
+      - "'iosxr_commit_confirmed' in get_hostname1.stdout[0]"
+
+- name: Reset hostname
+  cisco.iosxr.iosxr_config:
+    lines:
+      - "hostname {{ get_hostname.stdout[0] | split(' ') | last }}"
+
+- name: "get hostname"
+  register: get_hostname2
+  iosxr_command:
+    commands:
+      - "show running-config hostname"
+  ignore_errors: true
+
+- assert:
+    that:
+      - "'iosxr_commit_confirmed' not in get_hostname2.stdout[0]"
