@@ -19,6 +19,7 @@ description:
 version_added: 1.0.0
 extends_documentation_fragment:
 - cisco.iosxr.iosxr
+- cisco.iosxr.iosxr_commit_common
 notes:
 - This module works with connection C(network_cli). See L(the IOS-XR Platform Options,../network/user_guide/platform_iosxr.html).
 - This module does not support C(netconf) connection
@@ -129,26 +130,12 @@ options:
       role. If the directory does not exist, it is created.
     type: bool
     default: no
-  comment:
-    description:
-    - Allows a commit description to be specified to be included when the configuration
-      is committed.  If the configuration is not changed or committed, this argument
-      is ignored.
-    type: str
-    default: configured by iosxr_config
   admin:
     description:
     - Enters into administration configuration mode for making config changes to the
       device.
     type: bool
     default: no
-  label:
-    description:
-    - Allows a commit label to be specified to be included when the configuration
-      is committed. A valid label must begin with an alphabet and not exceed 30 characters,
-      only alphabets, digits, hyphens and underscores are allowed. If the configuration
-      is not changed or committed, this argument is ignored.
-    type: str
   backup_options:
     description:
     - This is a dict object containing configurable options related to backup file
@@ -172,22 +159,6 @@ options:
           in C(filename) within I(backup) directory.
         type: path
     type: dict
-  exclusive:
-    description:
-    - Enters into exclusive configuration mode that locks out all users from committing
-      configuration changes until the exclusive session ends.
-    type: bool
-    default: false
-  disable_default_comment:
-    description:
-    - disable default comment when set to True.
-    type: bool
-    default: false
-  disable_default_prompts:
-    description:
-    - disable default prompts and answers when set to True.
-    type: bool
-    default: false
 """
 
 EXAMPLES = """
